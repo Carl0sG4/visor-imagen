@@ -104,12 +104,6 @@ const imageObject = {
     "https://images.pexels.com/photos/4752959/pexels-photo-4752959.jpeg",
 };
 
-Object.values(imageObject).forEach(imageUrl => {
-  const image = new Image();
-
-  image.src = imageUrl;
-});
-
 const locationMap = [
   [
     "Braga",
@@ -193,14 +187,54 @@ const locationMap = [
   ],
 ];
 
-let [locationX, locationY] = /* Madrid */[2, 3];
+function findCoordinatesByName(locationName) {
+  for (let locationX = 0; locationX < locationMap.length; ++locationX)
+    for (let locationY = 0; locationY < locationMap[locationX].length; ++locationY) {
+      const localName = locationMap[locationX][locationY];
 
-for (let axisXIndex = 0; axisXIndex < locationMap.length; ++axisXIndex) {
-  let axisArray = locationMap[axisXIndex];
+      if (localName === locationName)
+        return { locationX, locationY };
+    }
 
-  for (let axisYIndex = 0; axisYIndex < axisArray.length; ++axisYIndex)
-    console.log(axisArray[axisYIndex], imageObject[axisArray[axisYIndex]]);
+  return null;
 }
+
+let {
+  locationX, locationY
+} = findCoordinatesByName("Madrid");
+
+if (false) {
+  for (let axisXIndex = 0; axisXIndex < locationMap.length; ++axisXIndex) {
+    let axisArray = locationMap[axisXIndex];
+
+    for (let axisYIndex = 0; axisYIndex < axisArray.length; ++axisYIndex) {
+      const locationName = axisArray[axisYIndex];
+
+      const imageBaseName = locationName.toLowerCase().replace(/\s/g, "-").replace("(", "").replace(")", "");
+
+      // GUARDAR COMO ALGUNA DE ESTAS: 
+
+      // para luego hacer:  ls | xargs -I{} bash -c 'magick convert "{}" "$(basename {}).png"' 
+      console.log(`${imageBaseName}.png`);
+      console.log(`${imageBaseName}.jpg`);
+      console.log(`${imageBaseName}.jpeg`);
+      console.log(`${imageBaseName}.webp`);
+    }
+  }
+
+  if (globalThis.process)
+    return;
+}
+
+// NOTE: Make the browser start caching every single image before we actually setup the event handlers.
+//
+//       If we don't do this, changing locations will feel sluggish or delayed.
+Object.values(imageObject).forEach(imageUrl => {
+  const image = new Image();
+
+  image.src = imageUrl;
+});
+
 
 const buttonNorth = document.getElementById("button-north");
 const buttonWest = document.getElementById("button-west");
@@ -231,14 +265,14 @@ function createHandler(targetDirection) {
       case "button-south":
         sign = targetDirection === "button-south" ? -1 : 1;
 
-        locationY = (locationY + sign) % locationMap[locationX].length;
+        locationY = Math.min(Math.max(locationY + sign, 0), locationMap[locationX].length - 1);
 
         break;
       case "button-west":
       case "button-east":
         sign = targetDirection === "button-west" ? -1 : 1;
 
-        locationX = (locationX + sign) % locationMap.length;
+        locationX = Math.min(Math.max(locationX + sign, 0), locationMap.length - 1);
 
         break;
 
