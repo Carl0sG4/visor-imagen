@@ -112,17 +112,6 @@ function getImageFilepath(locationName) {
   return `images/${normalizeLocationName(locationName)}.png`;
 }
 
-{
-  for (let locationX = 0; locationX < locationMap.length; ++locationX)
-    for (let locationY = 0; locationY < locationMap[locationX].length; ++locationY) {
-      const localName = locationMap[locationX][locationY];
-
-      console.log(normalizeLocationName(localName));
-    }
-
-  return;
-}
-
 function findCoordinatesByName(locationName) {
   for (let locationX = 0; locationX < locationMap.length; ++locationX)
     for (let locationY = 0; locationY < locationMap[locationX].length; ++locationY) {
