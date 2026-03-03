@@ -1,90 +1,88 @@
 const locationMap = [
-  // Northern Portugal / Galicia
+  // Atlantic west (Portugal)
   [
     "Braga",
     "Guimarães",
     "Porto",
     "Coimbra",
-    "Vigo",
     "Lisbon",
-    "Évora",
-    "Setúbal"
+    "Setúbal",
+    "Évora"
   ],
 
-  // Northern Spain
+  // Western Spain
   [
-    "Bilbao",
-    "San Sebastián",
-    "Santander",
-    "Valladolid",
+    "Vigo",
     "Oviedo",
     "Gijón",
     "León",
-    "Zaragoza"
+    "Valladolid",
+    "Madrid",
+    "Toledo"
   ],
 
-  // Central / Southern Spain
+  // Northern / Central Spain
   [
-    "Madrid",
-    "Toledo",
+    "Santander",
+    "Bilbao",
+    "San Sebastián",
+    "Zaragoza",
+    "Valencia",
+    "Alicante",
+    "Murcia"
+  ],
+
+  // Southern Spain
+  [
+    "Barcelona",
     "Cordoba",
     "Seville",
     "Granada",
     "Cádiz",
-    "Alicante",
-    "Valencia"
+    "Gibraltar"
   ],
 
-  // Eastern Spain / Balearics
+  // Balearic Islands
   [
-    "Barcelona",
-    "Murcia",
     "Palma (Mallorca)",
     "Pollensa (Mallorca)",
-    "Ibiza Town",
     "Ciutadella (Menorca)",
-    "Mahón (Menorca)",
+    "Menorca",
+    "Ibiza Town",
     "Eivissa Old Town"
   ],
 
   // Canary Islands
   [
-    "Costa Adeje",
-    "Arrecife (Lanzarote)",
-    "Corralejo (Fuerteventura)",
     "Puerto de la Cruz",
     "San Cristóbal de La Laguna",
     "Playa de Las Americas",
+    "Costa Adeje",
+    "Corralejo (Fuerteventura)",
+    "Arrecife (Lanzarote)",
     "Fuerteventura Town",
     "Tenerife Town"
   ],
 
-  // France South → North
+  // Southern → Northern France
   [
-    "Tolouse",
-    "Montpellier",
-    "Marseille",
     "Nice",
-    "Lyon",
+    "Marseille",
+    "Montpellier",
+    "Toulouse",
     "Bordeaux",
+    "Lyon",
+    "Dijon",
     "Paris",
-    "Strasbourg"
+    "Strasbourg",
+    "Lille"
   ],
 
-  // Andorra / Gibraltar / Western Europe
+  // Western / Central Europe
   [
-    "Andorra la Vella",
-    "Gibraltar",
-    "Monaco",
-    "Lille",
-    "Dijon",
     "Nantes",
     "Rennes",
-    "Brest"
-  ],
-
-  // Northern / Central Europe
-  [
+    "Brest",
     "Brussels",
     "Amsterdam",
     "Hamburg",
@@ -92,7 +90,9 @@ const locationMap = [
     "Munich",
     "Vienna",
     "Zurich",
-    "Geneva"
+    "Geneva",
+    "Monaco",
+    "Andorra la Vella"
   ]
 ];
 
@@ -126,7 +126,7 @@ function findCoordinatesByName(locationName) {
 
 let {
   locationX, locationY
-} = findCoordinatesByName("Madrid");
+} = findCoordinatesByName("Gibraltar");
 
 const buttonNorth = document.getElementById("button-north");
 const buttonWest = document.getElementById("button-west");
@@ -150,22 +150,34 @@ function createHandler(targetDirection) {
 
     switch (targetDirection) {
       case "button-north":
-      case "button-south":
+      case "button-south": {
         sign = targetDirection === "button-north" ? -1 : 1;
+
+        const column = locationMap[locationX];
+        
         locationY = Math.min(
           Math.max(locationY + sign, 0),
-          locationMap[locationX].length - 1
+          column.length - 1
         );
+
         break;
+      }
 
       case "button-west":
-      case "button-east":
+      case "button-east": {
         sign = targetDirection === "button-west" ? -1 : 1;
+
         locationX = Math.min(
           Math.max(locationX + sign, 0),
           locationMap.length - 1
         );
+
+        const column = locationMap[locationX];
+
+        locationY = Math.min(locationY, column.length - 1);
+
         break;
+      }
 
       default:
         console.error(`error: unknown move target '${targetDirection}'`);
