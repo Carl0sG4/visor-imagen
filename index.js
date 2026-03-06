@@ -36,7 +36,7 @@ const locationMap = [
   [
     "Barcelona",
     "Cordoba",
-    "Seville",
+    "Sevilla", 
     "Granada",
     "Cádiz",
     "Gibraltar"
