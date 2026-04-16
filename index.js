@@ -87,9 +87,9 @@ const locationMap = [
 const lookupMap = {};
 
 // NOTE: The default baseline score that any score must be under to be considered.
-const defaultBaselineScore = 10;
+const defaultBaselineScore = 5;
 
-function populateLookupMap(baselineScore = defaultBaselineScore) {
+function populateLookupMap(baselineScore) {
   for (const location of locationMap) {
     function determineBestMatch(currentLocation, targetDirection) {
       const candidateList = locationMap.filter(
@@ -140,7 +140,7 @@ function populateLookupMap(baselineScore = defaultBaselineScore) {
 }
 
 // Populate with default parameters.
-populateLookupMap();
+populateLookupMap(defaultBaselineScore);
 
 function normalizeLocationName(locationName) {
   return locationName
@@ -171,7 +171,7 @@ function findLocationByName(locationName) {
 const preloadList = [];
 
 for (const locationObject of locationMap) {
-  const {name: locationName} = locationObject;
+  const { name: locationName } = locationObject;
 
   const imagePath = getImageFilepath(locationName);
 
@@ -182,7 +182,7 @@ for (const locationObject of locationMap) {
   preloadList.push(preloadedImage);
 }
 
-const defaultLocationName = "Gibraltar";
+const defaultLocationName = "Madrid";
 
 let currentLocation = findLocationByName(defaultLocationName);
 
@@ -253,6 +253,14 @@ function createHandler(targetDirection) {
 
 const similarityInput = document.getElementById("similarity-input");
 
-similarityInput.value = defaultBaselineScore;
+similarityInput.setAttribute("value",
+  defaultBaselineScore
+);
 
-similarityInput.addEventListener("change", ({ value: baselineScore }) => populateLookupMap(baselineScore));
+similarityInput.addEventListener(
+  "change", (targetEvent) => populateLookupMap(parseFloat(targetEvent.target.value))
+);
+similarityInput.addEventListener(
+  "beforeinput",
+  (targetEvent) => populateLookupMap(parseFloat(targetEvent.target.value))
+);
