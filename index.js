@@ -84,7 +84,15 @@ const locationMap = [
   { name: "Andorra la Vella", latitude: 42.5063, longitude: 1.5218 },
 ];
 
-const lookupMap = {};
+const nameToLookupIndex = {};
+const lookupIndexToName = {};
+
+// NOTE: Creamos un mapa del nombre de una ubicación a su índice en `lookupArray`.
+locationMap.forEach(
+  ({ name: locationName }, index) => (nameToLookupIndex[locationName] = index, lookupIndexToName[index] = locationName)
+);
+
+const lookupArray = [];
 
 // NOTE: The default baseline score that any score must be under to be considered.
 const defaultBaselineScore = 5;
@@ -126,16 +134,19 @@ function populateLookupMap(baselineScore) {
       return bestScore <= baselineScore ? bestCandidate ?? currentLocation : currentLocation;
     }
 
-    const [north, south, west, east] = [
-      determineBestMatch(location, "north"),
-      determineBestMatch(location, "south"),
-      determineBestMatch(location, "west"),
-      determineBestMatch(location, "east"),
-    ];
+    const neighbourArray = ["north", "south", "west", "east"];
 
-    const { name } = location;
+    neighbourArray.forEach((targetDirection, targetIndex, targetArray) => {
+      const {
+        name: locationName
+      } = determineBestMatch(location, targetDirection);
 
-    Object.assign(lookupMap, { [name]: [north, south, west, east] });
+      targetArray[targetIndex] = nameToLookupIndex[locationName];
+    });
+
+    const { name: locationName } = location;
+
+    lookupArray[nameToLookupIndex[locationName]] = neighbourArray;
   }
 }
 
@@ -158,33 +169,28 @@ function getImageFilepath(locationName) {
   return `images/${normalizeLocationName(locationName)}.png`;
 }
 
-function findLocationByName(locationName) {
+// NOTE: Aquí precargamos las imágenes a usar en el visor, para que permanezcan en el caché
+// cuando se cambia de ubicación.
+{
+  const preloadList = [];
+
   for (const locationObject of locationMap) {
-    const { name: localName } = locationObject;
+    const { name: locationName } = locationObject;
 
-    if (localName === locationName) return locationObject;
+    const imagePath = getImageFilepath(locationName);
+
+    const preloadedImage = new Image();
+
+    preloadedImage.src = imagePath;
+
+    preloadList.push(preloadedImage);
   }
-
-  return null;
-}
-
-const preloadList = [];
-
-for (const locationObject of locationMap) {
-  const { name: locationName } = locationObject;
-
-  const imagePath = getImageFilepath(locationName);
-
-  const preloadedImage = new Image();
-
-  preloadedImage.src = imagePath;
-
-  preloadList.push(preloadedImage);
 }
 
 const defaultLocationName = "Madrid";
 
-let currentLocation = findLocationByName(defaultLocationName);
+// NOTE: Índice principal del programa, determina el indice que usar en la tabla de búsqueda.
+let currentLocation = nameToLookupIndex[defaultLocationName];
 
 const buttonNorth = document.getElementById("button-north");
 const buttonWest = document.getElementById("button-west");
@@ -194,8 +200,9 @@ const buttonEast = document.getElementById("button-east");
 const imageViewport = document.getElementById("image-viewport");
 const locationLabel = document.getElementById("location-label");
 
+// NOTE: Actualizamos con la ubicación por defecto.
 {
-  const { name: locationName } = currentLocation;
+  const locationName = lookupIndexToName[currentLocation];
 
   locationLabel.textContent = locationName;
 
@@ -218,9 +225,7 @@ function createHandler(targetDirection) {
       case "button-east": {
         const directionIndex = buttonToDirectionIndex[targetDirection];
 
-        const { name } = currentLocation;
-
-        currentLocation = lookupMap[name][directionIndex];
+        currentLocation = lookupArray[currentLocation][directionIndex];
 
         break;
       }
@@ -230,7 +235,7 @@ function createHandler(targetDirection) {
         return;
     }
 
-    const { name: locationName } = currentLocation;
+    const locationName = lookupIndexToName[currentLocation];
 
     locationLabel.textContent = locationName;
 
@@ -260,7 +265,7 @@ similarityInput.setAttribute("value",
 similarityInput.addEventListener(
   "change", (targetEvent) => populateLookupMap(parseFloat(targetEvent.target.value))
 );
+
 similarityInput.addEventListener(
-  "beforeinput",
-  (targetEvent) => populateLookupMap(parseFloat(targetEvent.target.value))
+  "beforeinput", (targetEvent) => populateLookupMap(parseFloat(targetEvent.target.value))
 );
