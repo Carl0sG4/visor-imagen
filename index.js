@@ -139,9 +139,8 @@ function populateLookupMap(baselineScore = defaultBaselineScore) {
   }
 }
 
+// Populate with default parameters.
 populateLookupMap();
-
-console.log(lookupMap);
 
 function normalizeLocationName(locationName) {
   return locationName
@@ -167,6 +166,20 @@ function findLocationByName(locationName) {
   }
 
   return null;
+}
+
+const preloadList = [];
+
+for (const locationObject of locationMap) {
+  const {name: locationName} = locationObject;
+
+  const imagePath = getImageFilepath(locationName);
+
+  const preloadedImage = new Image();
+
+  preloadedImage.src = imagePath;
+
+  preloadList.push(preloadedImage);
 }
 
 const defaultLocationName = "Gibraltar";
